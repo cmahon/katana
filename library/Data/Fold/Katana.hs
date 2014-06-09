@@ -6,7 +6,7 @@ import Control.Applicative
 import Control.Arrow
 import Control.Category
 import Data.Monoid
-import Prelude hiding (id,(.),foldl)
+import Prelude hiding (id,(.))
 
 -------------------------------------------------------------------------
 

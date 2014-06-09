@@ -10,6 +10,7 @@ main = do
   let k3 = fold1 3 kincdec
   print . fst $ unfold1 k1
   print . fst $ unfold1 $ snd $ unfold1 (k2 <|> k3)
+  print . fst $ katana kincdec [1,2,3]
 
 -------------------------------------------------------------------------
 

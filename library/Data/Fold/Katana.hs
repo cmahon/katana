@@ -1,20 +1,44 @@
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE TupleSections #-}
 
 module Data.Fold.Katana where
 
-import Control.Applicative
-import Control.Arrow
-import Control.Category
-import Data.Monoid
-import Prelude hiding (id,(.))
+import           Control.Applicative
+import           Control.Arrow
+import           Control.Category
+import           Data.Foldable       (Foldable,foldl)
+import           Data.Monoid
+import           Prelude             hiding (foldl,id,(.))
 
 -------------------------------------------------------------------------
+
+--TODO: clean up variable names
 
 fold1 :: a -> Katana a b -> Katana a b
 fold1 x (K c a s) = K c a (c s x)
 
+fold :: (Foldable f) => Katana a b -> f a -> Katana a b
+fold (K c a s) as = K c a (foldl c s as)
+
 unfold1 :: Katana a b -> (Maybe b, Katana a b)
 unfold1 (K c a s) = second (K c a) $ a s
+
+unfold :: Katana a b -> ([b], Katana a b)
+unfold (K c a s) = let (bs,s''') = unfold' s in (bs,K c a s''')
+  where
+  unfold' s' = case a s' of 
+    (Just b,s'') -> let (bs',s'''') = unfold' s'' in (b:bs',s'''')
+    (Nothing,_)  -> ([],s')
+
+katana :: (Foldable f) => Katana a b -> f a -> ([b], Katana a b)
+katana k = unfold . fold k
+
+recurse :: Katana a (Either a b) -> Katana a b
+recurse (K c a s) = K c a' s
+  where
+  a' s' = 
+    let (b,s'') = a s'
+    in  maybe (Nothing,s'') (either (a' . c s'') ((,s'') . Just)) b
 
 -------------------------------------------------------------------------
 

@@ -8,6 +8,7 @@ import           Control.Arrow
 import           Control.Category
 import           Data.Foldable       (Foldable,foldl)
 import           Data.Monoid
+import           Pipes
 import           Prelude             hiding (foldl,id,(.))
 
 -------------------------------------------------------------------------
@@ -39,6 +40,17 @@ recurse (K c a s) = K c a' s
   a' s' = 
     let (b,s'') = a s'
     in  maybe (Nothing,s'') (either (a' . c s'') ((,s'') . Just)) b
+
+toPipe :: (Monad m) => Katana a b -> Pipe a b m ()
+toPipe (K c a s) = go s
+  where
+  go s' = do
+    a' <- await
+    let s'' = c s' a'
+    unfold' s''
+  unfold' s' = case a s' of
+    (Just b,s'') -> yield b >> unfold' s'' 
+    (Nothing,_) -> go s'
 
 -------------------------------------------------------------------------
 

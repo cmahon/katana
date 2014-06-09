@@ -1,7 +1,11 @@
 module Main where
 
-import Control.Applicative
-import Data.Fold.Katana
+import           Control.Applicative
+import           Data.Fold.Katana
+import           Pipes
+import qualified Pipes.Prelude       as P
+
+-------------------------------------------------------------------------
 
 main :: IO ()
 main = do
@@ -11,6 +15,7 @@ main = do
   print . fst $ unfold1 k1
   print . fst $ unfold1 $ snd $ unfold1 (k2 <|> k3)
   print . fst $ katana kincdec [1,2,3]
+  runEffect $ each [1..3] >-> toPipe kincdec >-> P.print
 
 -------------------------------------------------------------------------
 

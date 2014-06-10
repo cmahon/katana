@@ -13,7 +13,7 @@ import           Prelude             hiding (foldl,id,(.))
 
 -------------------------------------------------------------------------
 
---TODO: clean up variable names
+--TODO: clean up variable names, sort out tail-call recursion
 
 fold1 :: a -> Katana a b -> Katana a b
 fold1 x (K c a s) = K c a (c s x)

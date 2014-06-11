@@ -13,7 +13,7 @@ import           Prelude             hiding (foldl,id,(.))
 
 -------------------------------------------------------------------------
 
---TODO: clean up variable names, sort out tail-call recursion
+--TODO: clean up variable names, tail-call optimisation, arrow laws (esp. first)
 
 fold1 :: a -> Katana a b -> Katana a b
 fold1 x (K c a s) = K c a (c s x)
@@ -54,7 +54,7 @@ toPipe (K c a s) = go s
 
 -------------------------------------------------------------------------
 
-data Katana a b = forall x. K (x -> a -> x) (x -> (Maybe b,x)) x -- (b -> b -> b)
+data Katana a b = forall x. K (x -> a -> x) (x -> (Maybe b,x)) x -- (x -> x -> x)
 
 instance Functor (Katana a) where
   fmap f (K c a s) = K c (first (fmap f) . a) s
@@ -107,6 +107,8 @@ instance Arrow Katana where
     a'' (Just b', s'') (Just d') = (Just (b',d'),(s'',Just d'))
     a'' _ d' = (Nothing,(s,d'))
     s' = (s,Nothing)
+  k1 &&& k2 = (,) <$> k1 <*> k2 
+  (K xc xa xs) *** (K yc ya ys) = (,) <$> (K (\x a -> xc x (fst a)) xa xs) <*> (K (\x a -> yc x (snd a)) ya ys)
 
 -------------------------------------------------------------------------
 
